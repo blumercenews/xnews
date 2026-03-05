@@ -2,22 +2,29 @@ name: NewsBot
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # Runs every 2 hours
+    - cron: "0 */2 * * *"
+  # Allow manual trigger from GitHub Actions tab
   workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-  
+          cache: "npm"
+
       - name: Install dependencies
         run: npm install
+
+      # Restore seen.json from cache so we don't re-tweet old articles
       - name: Restore seen articles cache
         uses: actions/cache@v4
         with:
@@ -25,6 +32,7 @@ jobs:
           key: seen-articles-${{ github.run_id }}
           restore-keys: |
             seen-articles-
+
       - name: Run bot
         env:
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
