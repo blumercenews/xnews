@@ -6,8 +6,26 @@ const path = require("path");
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const SEEN_FILE = path.join(__dirname, "seen.json");
-const MAX_TWEETS_PER_RUN = 3; // max tweets per GitHub Actions run
-const MIN_SCORE = 7; // Claude score threshold (1-10)
+const MAX_TWEETS_PER_RUN = 2;   // max tweets per run
+const MAX_EVALUATIONS = 12;     // max articles sent to Claude per run (cost control)
+const MIN_SCORE = 7;            // Claude score threshold (1-10)
+
+// ─── Pre-filter keywords (skip obviously minor articles before hitting Claude)
+const SKIP_KEYWORDS = [
+  "jim cramer", "top 10 things to watch", "should you hold", "best stocks",
+  "stock of the day", "analyst says buy", "price target", "ratings change",
+  "here's why", "why investors", "portfolio update", "fund increased",
+  "al pacino", "celebrity", "opinion:", "sponsored"
+];
+
+const MAJOR_KEYWORDS = [
+  "fed ", "federal reserve", "cpi", "inflation", "gdp", "nfp", "jobs report",
+  "interest rate", "powell", "rate cut", "rate hike", "recession",
+  "bitcoin", "btc", "ethereum", "eth", "crypto", "sec", "etf",
+  "bank fail", "collapse", "hack", "exploit", "sanctions", "tariff",
+  "earnings", "beats", "misses", "revenue", "billion", "trillion",
+  "breaking", "emergency", "crisis", "war", "geopolit"
+];
 
 // ─── RSS Feeds ─────────────────────────────────────────────────────────────
 const FEEDS = [
@@ -119,7 +137,7 @@ Respond ONLY in this exact JSON format, nothing else:
 
   try {
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 300,
       messages: [{ role: "user", content: prompt }],
     });
@@ -154,12 +172,31 @@ async function main() {
   console.log(`📰 Found ${articles.length} recent articles`);
 
   let tweeted = 0;
+  let evaluated = 0;
 
   for (const article of articles) {
     if (tweeted >= MAX_TWEETS_PER_RUN) break;
+    if (evaluated >= MAX_EVALUATIONS) break;
     if (!article.id || seen.has(article.id)) continue;
 
+    // Pre-filter: skip obvious junk without hitting Claude
+    const titleLower = article.title.toLowerCase();
+    if (SKIP_KEYWORDS.some(k => titleLower.includes(k))) {
+      seen.add(article.id);
+      saveSeen(seen);
+      continue;
+    }
+
+    // Pre-filter: only send to Claude if it looks potentially major
+    const hasMajorKeyword = MAJOR_KEYWORDS.some(k => titleLower.includes(k));
+    if (!hasMajorKeyword) {
+      seen.add(article.id);
+      saveSeen(seen);
+      continue;
+    }
+
     seen.add(article.id);
+    evaluated++;
     console.log(`\n🔍 Evaluating: ${article.title.slice(0, 80)}`);
 
     const result = await evaluateAndWrite(article);
