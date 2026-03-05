@@ -15,16 +15,26 @@ const SKIP_KEYWORDS = [
   "jim cramer", "top 10 things to watch", "should you hold", "best stocks",
   "stock of the day", "analyst says buy", "price target", "ratings change",
   "here's why", "why investors", "portfolio update", "fund increased",
-  "al pacino", "celebrity", "opinion:", "sponsored"
+  "al pacino", "celebrity", "opinion:", "sponsored", "thinks bitcoin",
+  "predicts bitcoin", "thinks btc", "predicts btc", "thinks eth",
+  "could reach", "might hit", "could hit", "price prediction",
+  "top picks", "stocks to watch", "5 reasons", "10 reasons",
+  "everything you need to know", "explained", "what is"
 ];
 
 const MAJOR_KEYWORDS = [
   "fed ", "federal reserve", "cpi", "inflation", "gdp", "nfp", "jobs report",
   "interest rate", "powell", "rate cut", "rate hike", "recession",
-  "bitcoin", "btc", "ethereum", "eth", "crypto", "sec", "etf",
-  "bank fail", "collapse", "hack", "exploit", "sanctions", "tariff",
+  "bitcoin", "btc", "ethereum", "eth", "crypto", "sec ", "etf",
+  "bank fail", "collapse", "hack", "exploit", "drain", "stolen",
+  "sanctions", "tariff", "trade war",
   "earnings", "beats", "misses", "revenue", "billion", "trillion",
-  "breaking", "emergency", "crisis", "war", "geopolit"
+  "breaking", "emergency", "crisis", "war", "geopolit",
+  "raises $", "funding round", "series a", "series b", "series c",
+  "acqui", "merger", "ipo", "license", "ban", "approved", "rejected",
+  "regulation", "congress", "senate", "legislation", "bill passed",
+  "stablecoin", "depeg", "defi", "protocol", "outage", "down",
+  "nation", "country", "government", "treasury", "reserve"
 ];
 
 // ─── RSS Feeds ─────────────────────────────────────────────────────────────
@@ -113,24 +123,57 @@ Category: ${article.category}
 
 TASK:
 1. Score this article 1-10 for how MAJOR it is to our audience. Only 7+ gets tweeted.
-   Major = Fed decisions, CPI/NFP/GDP prints, BTC/ETH big price moves, exchange hacks, regulatory actions, bank failures, major protocol upgrades, geopolitical market shocks, earnings beats/misses from mega caps.
-   NOT major = opinion pieces, minor altcoin news, rehashed old news, minor company updates.
+
+   MAJOR (7+) examples:
+   - Fed decisions, CPI/NFP/GDP prints, interest rate moves
+   - Major exchange hacks or exploits ($10M+)
+   - Big funding rounds ($100M+) for crypto or fintech
+   - Regulatory actions: SEC, CFTC, government crypto bills, bans, approvals
+   - Spot ETF approvals or rejections
+   - Major protocol upgrades or chain outages
+   - Bank failures or major financial institution collapses
+   - Geopolitical events moving markets
+   - Mega cap earnings beats/misses (Apple, Tesla, Nvidia etc)
+   - Stablecoin depegs or major DeFi exploits
+   - Nation-state Bitcoin adoption or bans
+   - Major corporate treasury Bitcoin purchases
+
+   NOT MAJOR (skip these):
+   - Price predictions and opinions ("Saylor thinks BTC hits 80k")
+   - Analyst ratings changes or price targets
+   - Minor altcoin news
+   - Opinion pieces or editorials
+   - Rehashed old news
+   - Minor company updates
+   - Celebrity crypto takes
+   - "Top stocks to watch" type content
 
 2. If score >= 7, write a tweet in our style:
-   - Max 240 chars
+   - EVERYTHING IN CAPITALS
+   - Max 240 chars total
    - Lead with the most important number or fact
-   - Use 🚨 for breaking/major, 📊 for macro data, ⚡ for crypto
-   - NO hashtags (they look amateur)
-   - NO "breaking:" text prefix — the emoji does that job
+   - Use 🚨 for major news, 📊 for macro data, ⚡ for crypto
+   - NO hashtags
+   - NO paragraphs — one or two punchy lines max
+   - NO source attribution at the end
    - Numbers and % front and center
-   - 1-2 sentences max, punchy
-   - End with source in parens e.g. (Reuters) (CoinDesk) (WSJ)
+
+   For score 9-10 (truly massive news) use this format:
+   "[ BREAKING ]
+
+   YOUR CAPS TWEET HERE"
+
+   For score 7-8 use normal format:
+   "🚨 YOUR CAPS TWEET HERE"
 
 Examples of our style:
-"🚨 Fed holds rates at 5.25-5.5% for 6th straight meeting. Powell: 'Not appropriate to cut until we have greater confidence inflation is moving toward 2%' (Fed)"
-"📊 US CPI: 3.1% YoY (Est: 3.2%) Core CPI: 3.9% YoY (Est: 4.0%) — softer than expected across the board (BLS)"
-"⚡ BTC breaks $100K for first time. $1.9T market cap. Over $800M shorts liquidated in last hour (Coinglass)"
-"🚨 SEC approves spot Ethereum ETFs. BlackRock, Fidelity, Grayscale all greenlit. Trading begins tomorrow (SEC)"
+"🚨 FED HOLDS RATES AT 5.25-5.5% FOR 6TH STRAIGHT MEETING. POWELL: NOT APPROPRIATE TO CUT UNTIL GREATER CONFIDENCE ON INFLATION"
+"📊 US CPI: 3.1% YOY (EST: 3.2%) CORE CPI: 3.9% YOY (EST: 4.0%) — SOFTER THAN EXPECTED ACROSS THE BOARD"
+"⚡ COINBASE SECURES FULL EU CRYPTO LICENCE. FIRST MAJOR US EXCHANGE APPROVED UNDER MICA FRAMEWORK"
+"⚡ $340M EXPLOIT HIT PROTOCOL X. FUNDS DRAINED VIA REENTRANCY ATTACK. TEAM HAS PAUSED CONTRACTS"
+"[ BREAKING ]
+
+SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK, FIDELITY, GRAYSCALE ALL GREENLIT. TRADING BEGINS TOMORROW"
 
 Respond ONLY in this exact JSON format, nothing else:
 {"score": <number>, "tweet": "<tweet text or empty string if score < 7>"}`;
