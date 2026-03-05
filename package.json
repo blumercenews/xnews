@@ -1,0 +1,15 @@
+{
+  "name": "crypto-macro-newsbot",
+  "version": "1.0.0",
+  "description": "AI-powered Twitter news bot for crypto & macro",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dry": "DRY_RUN=true node bot.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "rss-parser": "^3.13.0",
+    "twitter-api-v2": "^1.17.0"
+  }
+}
