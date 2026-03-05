@@ -40,18 +40,18 @@ const MAJOR_KEYWORDS = [
 // ─── RSS Feeds ─────────────────────────────────────────────────────────────
 const FEEDS = [
   // Macro / TradFi
-  { url: "https://feeds.reuters.com/reuters/businessNews", category: "MACRO" },
-  { url: "https://feeds.reuters.com/reuters/USNewsOnline", category: "MACRO" },
+  { url: "https://feeds.marketwatch.com/marketwatch/marketpulse/", category: "MACRO" },
+  { url: "https://feeds.marketwatch.com/marketwatch/topstories/", category: "MACRO" },
   { url: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml", category: "MACRO" },
   { url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", category: "MACRO" },
-  { url: "https://feeds.bloomberg.com/markets/news.rss", category: "MACRO" },
+  { url: "https://www.cnbc.com/id/10000664/device/rss/rss.html", category: "MACRO" },
   { url: "https://finance.yahoo.com/news/rssindex", category: "MACRO" },
   // Crypto
   { url: "https://www.coindesk.com/arc/outboundfeeds/rss/", category: "CRYPTO" },
   { url: "https://cointelegraph.com/rss", category: "CRYPTO" },
   { url: "https://www.theblock.co/rss.xml", category: "CRYPTO" },
   { url: "https://decrypt.co/feed", category: "CRYPTO" },
-  { url: "https://bitcoinmagazine.com/.rss/full/", category: "CRYPTO" },
+  { url: "https://news.bitcoin.com/feed/", category: "CRYPTO" },
 ];
 
 // ─── Clients ───────────────────────────────────────────────────────────────
