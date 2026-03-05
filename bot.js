@@ -86,7 +86,7 @@ function saveSeen(seen) {
 // ─── Fetch All Feeds ───────────────────────────────────────────────────────
 async function fetchArticles() {
   const articles = [];
-  const cutoff = Date.now() - 2 * 60 * 60 * 1000; // last 2 hours only
+  const cutoff = Date.now() - 4 * 60 * 60 * 1000; // last 4 hours (safe buffer for 2hr schedule)
 
   for (const feed of FEEDS) {
     try {
@@ -158,10 +158,8 @@ TASK:
    - NO source attribution at the end
    - Numbers and % front and center
 
-   For score 9-10 (truly massive news) use this format:
-   "[ BREAKING ]
-
-   YOUR CAPS TWEET HERE"
+   For score 9-10 (truly massive news) use this format — put BREAKING on same line:
+   "[ BREAKING ] YOUR CAPS TWEET HERE"
 
    For score 7-8 use normal format:
    "🚨 YOUR CAPS TWEET HERE"
@@ -171,11 +169,9 @@ Examples of our style:
 "📊 US CPI: 3.1% YOY (EST: 3.2%) CORE CPI: 3.9% YOY (EST: 4.0%) — SOFTER THAN EXPECTED ACROSS THE BOARD"
 "⚡ COINBASE SECURES FULL EU CRYPTO LICENCE. FIRST MAJOR US EXCHANGE APPROVED UNDER MICA FRAMEWORK"
 "⚡ $340M EXPLOIT HIT PROTOCOL X. FUNDS DRAINED VIA REENTRANCY ATTACK. TEAM HAS PAUSED CONTRACTS"
-"[ BREAKING ]
+"[ BREAKING ] SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK, FIDELITY, GRAYSCALE ALL GREENLIT. TRADING BEGINS TOMORROW"
 
-SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK, FIDELITY, GRAYSCALE ALL GREENLIT. TRADING BEGINS TOMORROW"
-
-Respond ONLY in this exact JSON format, nothing else:
+Respond ONLY in this exact JSON format on a single line, nothing else:
 {"score": <number>, "tweet": "<tweet text or empty string if score < 7>"}`;
 
   try {
@@ -186,8 +182,15 @@ Respond ONLY in this exact JSON format, nothing else:
     });
 
     const text = response.content[0].text.trim();
-    const clean = text.replace(/```json|```/g, "").trim();
-    return JSON.parse(clean);
+    // Strip markdown, normalize whitespace, handle edge cases
+    const clean = text
+      .replace(/```json|```/g, "")
+      .replace(/[\r\n]+/g, " ")
+      .trim();
+    const parsed = JSON.parse(clean);
+    // Ensure tweet is a string
+    parsed.tweet = String(parsed.tweet || "");
+    return parsed;
   } catch (e) {
     console.log(`⚠️  Claude error: ${e.message}`);
     return { score: 0, tweet: "" };
