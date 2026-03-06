@@ -15,26 +15,51 @@ const SKIP_KEYWORDS = [
   "jim cramer", "top 10 things to watch", "should you hold", "best stocks",
   "stock of the day", "analyst says buy", "price target", "ratings change",
   "here's why", "why investors", "portfolio update", "fund increased",
-  "al pacino", "celebrity", "opinion:", "sponsored", "thinks bitcoin",
+  "celebrity", "opinion:", "sponsored", "thinks bitcoin",
   "predicts bitcoin", "thinks btc", "predicts btc", "thinks eth",
   "could reach", "might hit", "could hit", "price prediction",
   "top picks", "stocks to watch", "5 reasons", "10 reasons",
-  "everything you need to know", "explained", "what is"
+  "everything you need to know", "what is", "how to",
+  "best crypto", "top altcoins", "gems", "hidden gem",
+  "technical analysis", "chart pattern", "support level"
 ];
 
 const MAJOR_KEYWORDS = [
+  // Macro data
   "fed ", "federal reserve", "cpi", "inflation", "gdp", "nfp", "jobs report",
   "interest rate", "powell", "rate cut", "rate hike", "recession",
-  "bitcoin", "btc", "ethereum", "eth", "crypto", "sec ", "etf",
-  "bank fail", "collapse", "hack", "exploit", "drain", "stolen",
+  "ism ", "pmi", "retail sales", "jobless claims", "unemployment",
+  "fomc", "balance sheet", "quantitative", "yield curve", "treasury",
+  // Crypto core
+  "bitcoin", "btc", "ethereum", "eth", "crypto", "blockchain",
+  "sec ", "etf", "stablecoin", "depeg", "defi", "protocol",
+  // Crypto exchanges & projects
+  "coinbase", "binance", "kraken", "okx", "bybit", "hyperliquid",
+  "uniswap", "aave", "maker", "compound", "solana", "avalanche",
+  "chainlink", "arbitrum", "optimism", "base ", "polygon",
+  // Bad stuff
+  "hack", "exploit", "drain", "stolen", "breach", "attack",
+  "bank fail", "collapse", "bankrupt", "insolvency",
+  "outage", "down ", "halted",
+  // Regulatory
   "sanctions", "tariff", "trade war",
-  "earnings", "beats", "misses", "revenue", "billion", "trillion",
-  "breaking", "emergency", "crisis", "war", "geopolit",
-  "raises $", "funding round", "series a", "series b", "series c",
-  "acqui", "merger", "ipo", "license", "ban", "approved", "rejected",
   "regulation", "congress", "senate", "legislation", "bill passed",
-  "stablecoin", "depeg", "defi", "protocol", "outage", "down",
-  "nation", "country", "government", "treasury", "reserve"
+  "lawsuit", "charges", "indicted", "arrested", "fraud",
+  "ban", "approved", "rejected", "ruling",
+  // Mega cap earnings & major moves
+  "nvidia", "nvda", "apple", "aapl", "tesla", "tsla",
+  "microsoft", "msft", "google", "alphabet", "meta ", "amazon",
+  "jpmorgan", "goldman", "blackrock", "fidelity",
+  "earnings", "beats", "misses", "revenue", "guidance",
+  // Big money
+  "billion", "trillion", "raises $", "funding round",
+  "series a", "series b", "series c", "acquisition", "merger", "ipo",
+  // Geopolitical
+  "breaking", "emergency", "crisis", "war", "geopolit",
+  "nation", "country", "government", "central bank",
+  // Corporate treasury / adoption
+  "treasury", "reserve", "purchase", "buys bitcoin", "adds bitcoin",
+  "tokeniz", "license", "policy"
 ];
 
 // ─── RSS Feeds ─────────────────────────────────────────────────────────────
@@ -125,18 +150,23 @@ TASK:
 1. Score this article 1-10 for how MAJOR it is to our audience. Only 7+ gets tweeted.
 
    MAJOR (7+) examples:
-   - Fed decisions, CPI/NFP/GDP prints, interest rate moves
+   - Fed decisions, CPI/NFP/GDP/ISM/PMI/jobless claims prints
+   - Interest rate moves, FOMC statements
    - Major exchange hacks or exploits ($10M+)
    - Big funding rounds ($100M+) for crypto or fintech
    - Regulatory actions: SEC, CFTC, government crypto bills, bans, approvals
    - Spot ETF approvals or rejections
-   - Major protocol upgrades or chain outages
+   - Major protocol upgrades, policy changes or announcements (Hyperliquid, Uniswap, Aave etc)
+   - Chain outages or major DeFi exploits
    - Bank failures or major financial institution collapses
    - Geopolitical events moving markets
-   - Mega cap earnings beats/misses (Apple, Tesla, Nvidia etc)
-   - Stablecoin depegs or major DeFi exploits
+   - Mega cap earnings beats/misses (Apple, Tesla, Nvidia, Microsoft, Google, Meta, Amazon)
+   - Major Nvidia/NVDA news (new chip, earnings, export restrictions)
+   - Stablecoin depegs
    - Nation-state Bitcoin adoption or bans
    - Major corporate treasury Bitcoin purchases
+   - Major crypto exchange news (Coinbase, Binance, OKX, Bybit, Kraken)
+   - BlackRock or Fidelity crypto moves
 
    NOT MAJOR (skip these):
    - Price predictions and opinions ("Saylor thinks BTC hits 80k")
