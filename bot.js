@@ -6,7 +6,7 @@ const path = require("path");
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const SEEN_FILE = path.join(__dirname, "seen.json");
-const MAX_TWEETS_PER_RUN = 2;   // max tweets per run
+const MAX_TWEETS_PER_RUN = 4;   // max tweets per run (doubled)
 const MAX_EVALUATIONS = 12;     // max articles sent to Claude per run (cost control)
 const MIN_SCORE = 7;            // Claude score threshold (1-10)
 
@@ -150,26 +150,31 @@ TASK:
 
 2. If score >= 7, write a tweet in our style:
    - EVERYTHING IN CAPITALS
-   - Max 240 chars total
+   - Max 180 chars — keep it SHORT, 2 lines max on mobile, punchy and direct
    - Lead with the most important number or fact
-   - Use 🚨 for major news, 📊 for macro data, ⚡ for crypto
    - NO hashtags
-   - NO paragraphs — one or two punchy lines max
+   - NO paragraphs — one punchy line, two at absolute most
    - NO source attribution at the end
-   - Numbers and % front and center
 
-   For score 9-10 (truly massive news) use this format — put BREAKING on same line:
-   "[ BREAKING ] YOUR CAPS TWEET HERE"
+   EMOJI RULES — follow these exactly:
+   - Score 9-10 breaking news (any category): start with 🚨
+   - Crypto news (score 7-8): NO emoji at all
+   - Macro data news (score 7-8, e.g. CPI/Fed/GDP): NO emoji at all
+   - Only use 🚨 for genuinely breaking, just-released major news
+   - Never use 📊 or ⚡ or any other emoji
 
-   For score 7-8 use normal format:
-   "🚨 YOUR CAPS TWEET HERE"
+   For score 9-10 breaking news:
+   "🚨 [ BREAKING ] YOUR CAPS TWEET HERE"
+
+   For score 7-8 (crypto or macro):
+   "YOUR CAPS TWEET HERE"
 
 Examples of our style:
-"🚨 FED HOLDS RATES AT 5.25-5.5% FOR 6TH STRAIGHT MEETING. POWELL: NOT APPROPRIATE TO CUT UNTIL GREATER CONFIDENCE ON INFLATION"
-"📊 US CPI: 3.1% YOY (EST: 3.2%) CORE CPI: 3.9% YOY (EST: 4.0%) — SOFTER THAN EXPECTED ACROSS THE BOARD"
-"⚡ COINBASE SECURES FULL EU CRYPTO LICENCE. FIRST MAJOR US EXCHANGE APPROVED UNDER MICA FRAMEWORK"
-"⚡ $340M EXPLOIT HIT PROTOCOL X. FUNDS DRAINED VIA REENTRANCY ATTACK. TEAM HAS PAUSED CONTRACTS"
-"[ BREAKING ] SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK, FIDELITY, GRAYSCALE ALL GREENLIT. TRADING BEGINS TOMORROW"
+"🚨 [ BREAKING ] FED CUTS RATES 50BPS — FIRST CUT IN 4 YEARS. POWELL: CONFIDENT INFLATION IS UNDER CONTROL"
+"ICE INVESTS IN OKX AT $25B VALUATION. WALL STREET BACKING CRYPTO EXCHANGE — MAJOR TRADFI SIGNAL"
+"US CPI 3.1% YOY (EST 3.2%). CORE 3.9% (EST 4.0%) — SOFTER THAN EXPECTED"
+"SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT. TRADING BEGINS TOMORROW"
+"COINBASE RAISES $500M SERIES D. VALUATION HITS $12B"
 
 Respond ONLY in this exact JSON format on a single line, nothing else:
 {"score": <number>, "tweet": "<tweet text or empty string if score < 7>"}`;
