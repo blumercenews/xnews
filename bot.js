@@ -6,9 +6,9 @@ const path = require("path");
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const SEEN_FILE = path.join(__dirname, "seen.json");
-const MAX_TWEETS_PER_RUN = 4;   // max tweets per run (doubled)
+const MAX_TWEETS_PER_RUN = 2;   // max tweets per run
 const MAX_EVALUATIONS = 12;     // max articles sent to Claude per run (cost control)
-const MIN_SCORE = 7;            // Claude score threshold (1-10)
+const MIN_SCORE = 8;            // raised to 8+ — only truly actionable news
 
 // ─── Pre-filter keywords (skip obviously minor articles before hitting Claude)
 const SKIP_KEYWORDS = [
@@ -178,39 +178,44 @@ TASK:
    - Celebrity crypto takes
    - "Top stocks to watch" type content
 
-2. If score >= 7, write a tweet in our style:
+2. If score >= 8, write a tweet in our style:
    - Start every tweet with *
-   - Use full stops instead of dashes — never use — in tweets
+   - Use full stops instead of dashes. Never use — in tweets
    - EVERYTHING IN CAPITALS
-   - Max 180 chars — keep it SHORT, 2 lines max on mobile, punchy and direct
+   - Max 120 chars ideally — short and punchy is ALWAYS better
+   - One single line is the goal. Two lines only if absolutely necessary
+   - Less is more. Cut every unnecessary word
    - Lead with the most important number or fact
    - NO hashtags
    - NO paragraphs — one punchy line, two at absolute most
    - NO source attribution at the end
 
-   EMOJI RULES — follow these exactly:
-   - Score 9-10 breaking news (any category): start with 🚨
-   - Crypto news (score 7-8): NO emoji at all
-   - Macro data news (score 7-8, e.g. CPI/Fed/GDP): NO emoji at all
-   - Only use 🚨 for genuinely breaking, just-released major news
-   - Never use 📊 or ⚡ or any other emoji
+   EMOJI RULES — critical, follow exactly:
+   - Score 9-10 ANY category: MUST start with 🚨 [ BREAKING ] — the 🚨 must be the very first character
+   - Score 8 any category: start with * only, NO emoji
+   - NEVER use 📊 or ⚡ or any other emoji ever
 
-   For score 9-10 breaking news:
+   For score 9-10:
    "🚨 [ BREAKING ] YOUR CAPS TWEET HERE"
 
-   For score 7-8 (crypto or macro):
-   "YOUR CAPS TWEET HERE"
+   For score 8:
+   "*YOUR CAPS TWEET HERE"
+
+Examples of correct output:
+{"score": 10, "tweet": "🚨 [ BREAKING ] FED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS. POWELL: CONFIDENT INFLATION IS UNDER CONTROL"}
+{"score": 9, "tweet": "🚨 [ BREAKING ] SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT. TRADING BEGINS TOMORROW"}
+{"score": 8, "tweet": "*ICE INVESTS IN OKX AT $25B VALUATION. WALL STREET BACKING CRYPTO. MAJOR TRADFI SIGNAL"}
+{"score": 8, "tweet": "*US CPI 3.1% YOY (EST 3.2%). CORE 3.9% (EST 4.0%). SOFTER THAN EXPECTED"}
 
 Examples of our style:
 "🚨 [ BREAKING ] FED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS. POWELL: CONFIDENT INFLATION IS UNDER CONTROL"
-"*ICE INVESTS IN OKX AT $25B VALUATION. WALL STREET BACKING CRYPTO EXCHANGE. MAJOR TRADFI SIGNAL"
+"*ICE INVESTS IN OKX AT $25B VALUATION. WALL STREET BACKING CRYPTO. MAJOR TRADFI SIGNAL"
 "*US CPI 3.1% YOY (EST 3.2%). CORE 3.9% (EST 4.0%). SOFTER THAN EXPECTED"
-"*SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT. TRADING BEGINS TOMORROW"
-"*MAERSK SUSPENDS TWO KEY SHIPPING ROUTES AS IRAN WAR ESCALATES. GLOBAL SUPPLY CHAINS UNDER PRESSURE. INFLATION RISK RISING"
+"🚨 [ BREAKING ] BYBIT HACKED FOR $1.4B. LARGEST CRYPTO EXCHANGE HACK IN HISTORY. WITHDRAWALS PAUSED"
+"*NVIDIA Q4 EARNINGS: EPS $5.16 (EST $4.64). REVENUE $22.1B (EST $20.4B). BEATS ACROSS THE BOARD"
 
 Respond ONLY in this exact JSON format on a single line, nothing else:
-{"score": <number>, "tweet": "<tweet text or empty string if score < 7>"}`;
-
+{"score": <number>, "tweet": "<tweet text or empty string if score < 8>"}`;
   try {
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
