@@ -8,7 +8,7 @@ const path = require("path");
 const SEEN_FILE = path.join(__dirname, "seen.json");
 const MAX_TWEETS_PER_RUN = 2;   // max tweets per run
 const MAX_EVALUATIONS = 12;     // max articles sent to Claude per run (cost control)
-const MIN_SCORE = 8;            // raised to 8+ — only truly actionable news
+const MIN_SCORE = 7;            // threshold — 7+ posts, 9-10 gets BREAKING
 
 // ─── Pre-filter keywords (skip obviously minor articles before hitting Claude)
 const SKIP_KEYWORDS = [
@@ -178,44 +178,45 @@ TASK:
    - Celebrity crypto takes
    - "Top stocks to watch" type content
 
-2. If score >= 8, write a tweet in our style:
-   - Start every tweet with *
-   - Use full stops instead of dashes. Never use — in tweets
+2. If score >= 7, write a tweet using ONE of these three exact formats:
+
+   ── FORMAT A: BREAKING NEWS (score 9-10) ──
+   Use when news is truly breaking and market-moving.
+   🚨 must be first character. Blank line between [ BREAKING ] and the news.
+   Example:
+   "🚨 [ BREAKING ]\n\nFED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS"
+
+   ── FORMAT B: EARNINGS / MACRO DATA ──
+   Use for earnings reports and macro data prints (CPI, NFP, GDP etc).
+   Company name + cashtag on first line, blank line, then structured data lines.
+   Keep each data line short. Max 3 data lines.
+   Example earnings:
+   "ROBINHOOD [$HOOD](https://x.com/search?q=%24HOOD&src=cashtag_click) EARNINGS\n\nEPS: $0.38 vs EST: $0.39\nREV: $1.06B vs EST: $1.14B"
+   Example macro:
+   "US CPI — MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"
+
+   ── FORMAT C: STANDARD NEWS (score 7-8) ──
+   Start with *. One or two lines MAX. Short and punchy.
+   Example:
+   "*ICE INVESTS IN OKX AT $25B. MAJOR TRADFI SIGNAL"
+
+   RULES FOR ALL FORMATS:
    - EVERYTHING IN CAPITALS
-   - Max 120 chars ideally — short and punchy is ALWAYS better
-   - One single line is the goal. Two lines only if absolutely necessary
-   - Less is more. Cut every unnecessary word
-   - Lead with the most important number or fact
-   - NO hashtags
-   - NO paragraphs — one punchy line, two at absolute most
-   - NO source attribution at the end
+   - No hashtags
+   - No source attribution
+   - Never use — as a dash in sentences
+   - For Format B earnings always include the cashtag link exactly as shown
 
-   EMOJI RULES — critical, follow exactly:
-   - Score 9-10 ANY category: MUST start with 🚨 [ BREAKING ] — the 🚨 must be the very first character
-   - Score 8 any category: start with * only, NO emoji
-   - NEVER use 📊 or ⚡ or any other emoji ever
-
-   For score 9-10:
-   "🚨 [ BREAKING ] YOUR CAPS TWEET HERE"
-
-   For score 8:
-   "*YOUR CAPS TWEET HERE"
-
-Examples of correct output:
-{"score": 10, "tweet": "🚨 [ BREAKING ] FED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS. POWELL: CONFIDENT INFLATION IS UNDER CONTROL"}
-{"score": 9, "tweet": "🚨 [ BREAKING ] SEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT. TRADING BEGINS TOMORROW"}
-{"score": 8, "tweet": "*ICE INVESTS IN OKX AT $25B VALUATION. WALL STREET BACKING CRYPTO. MAJOR TRADFI SIGNAL"}
-{"score": 8, "tweet": "*US CPI 3.1% YOY (EST 3.2%). CORE 3.9% (EST 4.0%). SOFTER THAN EXPECTED"}
-
-Examples of our style:
-"🚨 [ BREAKING ] FED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS. POWELL: CONFIDENT INFLATION IS UNDER CONTROL"
-"*ICE INVESTS IN OKX AT $25B VALUATION. WALL STREET BACKING CRYPTO. MAJOR TRADFI SIGNAL"
-"*US CPI 3.1% YOY (EST 3.2%). CORE 3.9% (EST 4.0%). SOFTER THAN EXPECTED"
-"🚨 [ BREAKING ] BYBIT HACKED FOR $1.4B. LARGEST CRYPTO EXCHANGE HACK IN HISTORY. WITHDRAWALS PAUSED"
-"*NVIDIA Q4 EARNINGS: EPS $5.16 (EST $4.64). REVENUE $22.1B (EST $20.4B). BEATS ACROSS THE BOARD"
+Examples of correct JSON output:
+{"score": 10, "tweet": "🚨 [ BREAKING ]\n\nSEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT"}
+{"score": 9, "tweet": "🚨 [ BREAKING ]\n\nFED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS"}
+{"score": 8, "tweet": "ROBINHOOD [$HOOD](https://x.com/search?q=%24HOOD&src=cashtag_click) EARNINGS\n\nEPS: $0.38 vs EST: $0.39\nREV: $1.06B vs EST: $1.14B"}
+{"score": 8, "tweet": "US CPI — MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"}
+{"score": 7, "tweet": "*BYBIT HACKED FOR $1.4B. LARGEST CRYPTO HACK IN HISTORY. WITHDRAWALS PAUSED"}
+{"score": 7, "tweet": "*COINBASE RAISES $500M. VALUATION HITS $12B"}
 
 Respond ONLY in this exact JSON format on a single line, nothing else:
-{"score": <number>, "tweet": "<tweet text or empty string if score < 8>"}`;
+{"score": <number>, "tweet": "<tweet text or empty string if score < 7>"}`;
   try {
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
@@ -224,13 +225,9 @@ Respond ONLY in this exact JSON format on a single line, nothing else:
     });
 
     const text = response.content[0].text.trim();
-    // Strip markdown, normalize whitespace, handle edge cases
-    const clean = text
-      .replace(/```json|```/g, "")
-      .replace(/[\r\n]+/g, " ")
-      .trim();
+    // Strip markdown fences only, preserve newlines inside tweet content
+    const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
-    // Ensure tweet is a string
     parsed.tweet = String(parsed.tweet || "");
     return parsed;
   } catch (e) {
