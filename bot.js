@@ -12,6 +12,7 @@ const MIN_SCORE = 7;            // threshold — 7+ posts, 9-10 gets BREAKING
 
 // ─── Pre-filter keywords (skip obviously minor articles before hitting Claude)
 const SKIP_KEYWORDS = [
+  // Noise/opinion
   "jim cramer", "top 10 things to watch", "should you hold", "best stocks",
   "stock of the day", "analyst says buy", "price target", "ratings change",
   "here's why", "why investors", "portfolio update", "fund increased",
@@ -21,7 +22,22 @@ const SKIP_KEYWORDS = [
   "top picks", "stocks to watch", "5 reasons", "10 reasons",
   "everything you need to know", "what is", "how to",
   "best crypto", "top altcoins", "gems", "hidden gem",
-  "technical analysis", "chart pattern", "support level"
+  "technical analysis", "chart pattern", "support level",
+  // Minor country macro data — we only want US/UK/EU/China/Japan
+  "australia", "australian", "rba ", "reserve bank of australia",
+  "canada", "canadian", "bank of canada",
+  "new zealand", "rbnz",
+  "india", "rbi ", "reserve bank of india",
+  "brazil", "brazil central bank",
+  "mexico", "banxico",
+  "south korea", "bank of korea",
+  "indonesia", "bank indonesia",
+  "turkey", "tcmb",
+  "south africa", "sarb ",
+  "singapore", "mas ",
+  "sweden", "riksbank",
+  "norway", "norges bank",
+  "denmark", "swiss national bank",
 ];
 
 const MAJOR_KEYWORDS = [
@@ -177,6 +193,9 @@ TASK:
    - Minor company updates
    - Celebrity crypto takes
    - "Top stocks to watch" type content
+   - Macro/inflation/central bank data from minor economies — ONLY cover:
+     US (Fed), UK (Bank of England), Eurozone (ECB), China (PBOC), Japan (BOJ)
+     Everything else (Australia, Canada, NZ, India, Brazil etc) = NOT MAJOR, score 3 or below
 
 2. If score >= 7, write a tweet using ONE of these three exact formats:
 
@@ -200,12 +219,17 @@ TASK:
    Example:
    "*ICE INVESTS IN OKX AT $25B. MAJOR TRADFI SIGNAL"
 
-   RULES FOR ALL FORMATS:
-   - EVERYTHING IN CAPITALS
-   - No hashtags
-   - No source attribution
-   - Never use — as a dash in sentences
-   - For Format B earnings always include the cashtag link exactly as shown
+   EMOJI RULES:
+   - For central bank rate decisions or policy changes, start with the relevant flag emoji:
+     🇺🇸 Fed, 🇬🇧 Bank of England, 🇪🇺 ECB, 🇨🇳 PBOC, 🇯🇵 BOJ
+   - Score 9-10 breaking news: 🚨 [ BREAKING ] — flag emoji goes after if central bank
+   - Standard news score 7-8: start with * only, no emoji
+   - NEVER use 📊 or ⚡ or any other emoji
+   - Flag emoji examples:
+     "🇺🇸 FED HOLDS RATES AT 5.25%. POWELL: NO CUT UNTIL INFLATION UNDER CONTROL"
+     "🇬🇧 BANK OF ENGLAND CUTS RATES 25BPS TO 4.5%. FIRST CUT IN 4 YEARS"
+     "🇪🇺 ECB CUTS RATES 25BPS. LAGARDE: MORE CUTS LIKELY IF INFLATION FALLS"
+     "🚨 [ BREAKING ]\n\n🇺🇸 FED EMERGENCY CUT 50BPS. FIRST EMERGENCY MOVE SINCE 2020"
 
 Examples of correct JSON output:
 {"score": 10, "tweet": "🚨 [ BREAKING ]\n\nSEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT"}
