@@ -207,10 +207,15 @@ TASK:
 
    ── FORMAT B: EARNINGS / MACRO DATA ──
    Use for earnings reports and macro data prints (CPI, NFP, GDP etc).
-   Company name + cashtag on first line, blank line, then structured data lines.
-   Keep each data line short. Max 3 data lines.
+   Company name + plain cashtag on first line, blank line, then structured data lines.
+   STRICT RULES:
+   - Always include exact EPS and REV numbers with estimates — never just say "BEAT"
+   - Max 3 data lines
+   - Cashtag is plain text only — NO links, NO markdown, NO brackets
+   - Format: COMPANY NAME $TICKER
    Example earnings:
-   "ROBINHOOD [$HOOD](https://x.com/search?q=%24HOOD&src=cashtag_click) EARNINGS\n\nEPS: $0.38 vs EST: $0.39\nREV: $1.06B vs EST: $1.14B"
+   "ALPHABET $GOOGL EARNINGS\n\nEPS: $2.81 vs EST: $2.01\nREV: $90.2B vs EST: $89.1B\nCLOUD: $12.3B vs EST: $12.2B"
+   "NVIDIA $NVDA EARNINGS\n\nEPS: $5.16 vs EST: $4.64\nREV: $22.1B vs EST: $20.4B"
    Example macro:
    "US CPI — MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"
 
