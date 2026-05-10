@@ -23,7 +23,11 @@ const SKIP_KEYWORDS = [
   "everything you need to know", "what is", "how to",
   "best crypto", "top altcoins", "gems", "hidden gem",
   "technical analysis", "chart pattern", "support level",
-  // Minor country macro data — we only want US/UK/EU/China/Japan
+  // Anticipation/preview tweets — no actual data, just noise
+  "awaiting print", "awaiting data", "print incoming", "incoming friday",
+  "ahead of", "preview:", "what to expect", "markets pricing in",
+  "expected to show", "due friday", "due tomorrow", "due later",
+  "analysts expect", "consensus expects", "whisper number",
   "australia", "australian", "rba ", "reserve bank of australia",
   "canada", "canadian", "bank of canada",
   "new zealand", "rbnz",
@@ -207,40 +211,49 @@ TASK:
 
    ── FORMAT B: EARNINGS / MACRO DATA ──
    Use for earnings reports and macro data prints (CPI, NFP, GDP etc).
+   ONLY tweet when the ACTUAL DATA HAS BEEN RELEASED. Never tweet previews, anticipation or "awaiting" articles.
    Company name + plain cashtag on first line, blank line, then structured data lines.
    STRICT RULES:
-   - Always include exact EPS and REV numbers with estimates — never just say "BEAT"
+   - Always include exact EPS and REV numbers with estimates. NEVER say "BEAT" or "MISS" without numbers
    - Max 3 data lines
-   - Cashtag is plain text only — NO links, NO markdown, NO brackets
-   - Format: COMPANY NAME $TICKER
+   - NO markdown links of any kind. NO brackets around cashtags. Plain $TICKER only
+   - NO dashes or — anywhere. Use full stops only
+   - Format: COMPANY NAME $TICKER EARNINGS
    Example earnings:
    "ALPHABET $GOOGL EARNINGS\n\nEPS: $2.81 vs EST: $2.01\nREV: $90.2B vs EST: $89.1B\nCLOUD: $12.3B vs EST: $12.2B"
    "NVIDIA $NVDA EARNINGS\n\nEPS: $5.16 vs EST: $4.64\nREV: $22.1B vs EST: $20.4B"
+   "APPLE $AAPL EARNINGS\n\nEPS: $1.65 vs EST: $1.61\nREV: $95.4B vs EST: $94.2B\nGUIDANCE: +14% vs EST +5%"
    Example macro:
-   "US CPI — MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"
+   "US CPI. MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"
+   "US NFP. APRIL 2025\n\nJOBS ADDED: 177K vs EST 133K\nUNEMPLOYMENT: 4.2% vs EST 4.3%"
 
    ── FORMAT C: STANDARD NEWS (score 7-8) ──
-   Start with *. One or two lines MAX. Short and punchy.
+   Start with *. One or two lines MAX. Short and punchy. NO dashes.
    Example:
    "*ICE INVESTS IN OKX AT $25B. MAJOR TRADFI SIGNAL"
 
    EMOJI RULES:
    - For central bank rate decisions or policy changes, start with the relevant flag emoji:
      🇺🇸 Fed, 🇬🇧 Bank of England, 🇪🇺 ECB, 🇨🇳 PBOC, 🇯🇵 BOJ
-   - Score 9-10 breaking news: 🚨 [ BREAKING ] — flag emoji goes after if central bank
+   - Score 9-10 breaking news: 🚨 [ BREAKING ] then blank line then news
    - Standard news score 7-8: start with * only, no emoji
    - NEVER use 📊 or ⚡ or any other emoji
    - Flag emoji examples:
      "🇺🇸 FED HOLDS RATES AT 5.25%. POWELL: NO CUT UNTIL INFLATION UNDER CONTROL"
      "🇬🇧 BANK OF ENGLAND CUTS RATES 25BPS TO 4.5%. FIRST CUT IN 4 YEARS"
      "🇪🇺 ECB CUTS RATES 25BPS. LAGARDE: MORE CUTS LIKELY IF INFLATION FALLS"
-     "🚨 [ BREAKING ]\n\n🇺🇸 FED EMERGENCY CUT 50BPS. FIRST EMERGENCY MOVE SINCE 2020"
+
+   GLOBAL RULES FOR ALL FORMATS:
+   - EVERYTHING IN CAPITALS
+   - NEVER use — or . as separators mid-sentence. Full stops only at end of sentences
+   - No hashtags. No source. No markdown. No links. No brackets around tickers
+   - Only tweet when actual data has dropped. Never preview tweets
 
 Examples of correct JSON output:
 {"score": 10, "tweet": "🚨 [ BREAKING ]\n\nSEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT"}
 {"score": 9, "tweet": "🚨 [ BREAKING ]\n\nFED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS"}
-{"score": 8, "tweet": "ROBINHOOD [$HOOD](https://x.com/search?q=%24HOOD&src=cashtag_click) EARNINGS\n\nEPS: $0.38 vs EST: $0.39\nREV: $1.06B vs EST: $1.14B"}
-{"score": 8, "tweet": "US CPI — MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"}
+{"score": 8, "tweet": "APPLE $AAPL EARNINGS\n\nEPS: $1.65 vs EST: $1.61\nREV: $95.4B vs EST: $94.2B\nGUIDANCE: +14% vs EST +5%"}
+{"score": 8, "tweet": "US CPI. MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"}
 {"score": 7, "tweet": "*BYBIT HACKED FOR $1.4B. LARGEST CRYPTO HACK IN HISTORY. WITHDRAWALS PAUSED"}
 {"score": 7, "tweet": "*COINBASE RAISES $500M. VALUATION HITS $12B"}
 
