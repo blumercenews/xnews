@@ -111,12 +111,14 @@ const twitter = new TwitterApi({
 
 const parser = new Parser({ timeout: 10000 });
 
+const RECENT_TWEETS_FILE = path.join(__dirname, "recent_tweets.json");
+const TOPIC_WINDOW_MS = 6 * 60 * 60 * 1000; // 6 hours — no duplicate topics in this window
+
 // ─── Seen Articles Store ───────────────────────────────────────────────────
 function loadSeen() {
   try {
     if (fs.existsSync(SEEN_FILE)) {
       const data = JSON.parse(fs.readFileSync(SEEN_FILE, "utf8"));
-      // Only keep last 500 to prevent file bloat
       if (data.length > 500) data.splice(0, data.length - 500);
       return new Set(data);
     }
@@ -126,6 +128,51 @@ function loadSeen() {
 
 function saveSeen(seen) {
   fs.writeFileSync(SEEN_FILE, JSON.stringify([...seen]), "utf8");
+}
+
+// ─── Recent Tweets Store (topic deduplication) ────────────────────────────
+function loadRecentTweets() {
+  try {
+    if (fs.existsSync(RECENT_TWEETS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(RECENT_TWEETS_FILE, "utf8"));
+      // Only keep tweets from last 6 hours
+      const cutoff = Date.now() - TOPIC_WINDOW_MS;
+      return data.filter(t => t.ts > cutoff);
+    }
+  } catch (e) {}
+  return [];
+}
+
+function saveRecentTweets(tweets) {
+  const cutoff = Date.now() - TOPIC_WINDOW_MS;
+  const trimmed = tweets.filter(t => t.ts > cutoff).slice(-20);
+  fs.writeFileSync(RECENT_TWEETS_FILE, JSON.stringify(trimmed), "utf8");
+}
+
+// ─── Topic Duplicate Check ─────────────────────────────────────────────────
+function isDuplicateTopic(title, recentTweets) {
+  if (recentTweets.length === 0) return false;
+
+  const titleLower = title.toLowerCase();
+
+  // Extract key entities from title (companies, protocols, data types)
+  const entities = titleLower.match(/\b([a-z]{4,})\b/g) || [];
+  const keyEntities = entities.filter(w =>
+    !["that", "this", "with", "from", "have", "been", "will", "says", "said",
+      "after", "over", "more", "than", "than", "their", "they", "what", "were",
+      "when", "into", "also", "your", "about", "which"].includes(w)
+  );
+
+  for (const recent of recentTweets) {
+    const recentLower = recent.title.toLowerCase();
+    // Count how many key entities match
+    const matches = keyEntities.filter(e => recentLower.includes(e)).length;
+    if (matches >= 3) {
+      console.log(`   ⚠️  Duplicate topic detected (${matches} matching entities) — skipping`);
+      return true;
+    }
+  }
+  return false;
 }
 
 // ─── Fetch All Feeds ───────────────────────────────────────────────────────
@@ -301,6 +348,7 @@ async function main() {
   console.log(`\n🤖 NewsBot starting — ${new Date().toISOString()}`);
 
   const seen = loadSeen();
+  const recentTweets = loadRecentTweets();
   const articles = await fetchArticles();
   console.log(`📰 Found ${articles.length} recent articles`);
 
@@ -328,6 +376,13 @@ async function main() {
       continue;
     }
 
+    // Topic deduplication — skip if same story tweeted in last 6 hours
+    if (isDuplicateTopic(article.title, recentTweets)) {
+      seen.add(article.id);
+      saveSeen(seen);
+      continue;
+    }
+
     seen.add(article.id);
     evaluated++;
     console.log(`\n🔍 Evaluating: ${article.title.slice(0, 80)}`);
@@ -340,15 +395,18 @@ async function main() {
 
       if (process.env.DRY_RUN === "true") {
         console.log(`   [DRY RUN — not posting]`);
+        recentTweets.push({ title: article.title, ts: Date.now() });
       } else {
         const posted = await postTweet(result.tweet);
-        if (posted) tweeted++;
-        // Rate limit safety: wait 3s between tweets
+        if (posted) {
+          tweeted++;
+          recentTweets.push({ title: article.title, ts: Date.now() });
+          saveRecentTweets(recentTweets);
+        }
         if (tweeted < MAX_TWEETS_PER_RUN) await sleep(3000);
       }
     }
 
-    // Save after each to prevent re-processing if job crashes
     saveSeen(seen);
   }
 
