@@ -210,52 +210,58 @@ TASK:
    "🚨 [ BREAKING ]\n\nFED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS"
 
    ── FORMAT B: EARNINGS / MACRO DATA ──
-   Use for earnings reports and macro data prints (CPI, NFP, GDP etc).
-   ONLY tweet when the ACTUAL DATA HAS BEEN RELEASED. Never tweet previews, anticipation or "awaiting" articles.
-   Company name + plain cashtag on first line, blank line, then structured data lines.
+   Use for earnings reports and macro data prints (CPI, NFP, GDP, retail sales etc).
+   ONLY tweet when the ACTUAL DATA HAS BEEN RELEASED. Never tweet previews or anticipation.
+   Title on first line, blank line, then structured data lines.
    STRICT RULES:
-   - Always include exact EPS and REV numbers with estimates. NEVER say "BEAT" or "MISS" without numbers
+   - Always include exact numbers with estimates. NEVER say "BEAT" or "MISS" without numbers
    - Max 3 data lines
-   - NO markdown links of any kind. NO brackets around cashtags. Plain $TICKER only
-   - NO dashes or — anywhere. Use full stops only
-   - Format: COMPANY NAME $TICKER EARNINGS
+   - Each data line MUST be under 35 characters to avoid mobile wrapping
+   - Keep labels short: CPI not HEADLINE CPI, REV not REVENUE
+   - NO markdown links. NO brackets around tickers. Plain $TICKER only
+   - NO dashes anywhere
+   - US CPI exact format must be:
+   "U.S CPI\n\nCPI: +X.X% YoY vs +X.X% EST\nCORE CPI: +X.X% YoY vs +X.X% EST"
+   - US NFP exact format:
+   "U.S JOBS REPORT\n\nNFP: +177K vs EST +133K\nUNEMPLOYMENT: 4.2% vs EST 4.3%"
    Example earnings:
-   "ALPHABET $GOOGL EARNINGS\n\nEPS: $2.81 vs EST: $2.01\nREV: $90.2B vs EST: $89.1B\nCLOUD: $12.3B vs EST: $12.2B"
-   "NVIDIA $NVDA EARNINGS\n\nEPS: $5.16 vs EST: $4.64\nREV: $22.1B vs EST: $20.4B"
-   "APPLE $AAPL EARNINGS\n\nEPS: $1.65 vs EST: $1.61\nREV: $95.4B vs EST: $94.2B\nGUIDANCE: +14% vs EST +5%"
+   "ALPHABET $GOOGL EARNINGS\n\nEPS: $2.81 vs EST $2.01\nREV: $90.2B vs EST $89.1B\nCLOUD: $12.3B vs EST $12.2B"
+   "APPLE $AAPL EARNINGS\n\nEPS: $1.65 vs EST $1.61\nREV: $95.4B vs EST $94.2B\nGUIDANCE: +14% vs EST +5%"
    Example macro:
-   "US CPI. MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"
-   "US NFP. APRIL 2025\n\nJOBS ADDED: 177K vs EST 133K\nUNEMPLOYMENT: 4.2% vs EST 4.3%"
+   "U.S CPI\n\nCPI: +2.7% YoY vs +2.7% EST\nCORE CPI: +2.6% YoY vs +2.7% EST"
+   "U.S JOBS REPORT\n\nNFP: +177K vs EST +133K\nUNEMPLOYMENT: 4.2% vs EST 4.3%"
 
    ── FORMAT C: STANDARD NEWS (score 7-8) ──
-   Start with *. One or two lines MAX. Short and punchy. NO dashes.
+   No prefix. Just start the tweet directly. One or two lines MAX. Short and punchy. NO dashes.
    Example:
-   "*ICE INVESTS IN OKX AT $25B. MAJOR TRADFI SIGNAL"
+   "ICE INVESTS IN OKX AT $25B. MAJOR TRADFI SIGNAL"
+   "BYBIT HACKED FOR $1.4B. LARGEST CRYPTO HACK IN HISTORY"
 
    EMOJI RULES:
-   - For central bank rate decisions or policy changes, start with the relevant flag emoji:
+   - For central bank rate decisions or policy changes, start with the relevant flag:
      🇺🇸 Fed, 🇬🇧 Bank of England, 🇪🇺 ECB, 🇨🇳 PBOC, 🇯🇵 BOJ
-   - Score 9-10 breaking news: 🚨 [ BREAKING ] then blank line then news
-   - Standard news score 7-8: start with * only, no emoji
-   - NEVER use 📊 or ⚡ or any other emoji
+   - Score 9-10 breaking: 🚨 [ BREAKING ] then blank line then news
+   - All other news: no emoji, no prefix, just start the tweet
+   - NEVER use 📊 ⚡ * or any other emoji or prefix
    - Flag emoji examples:
      "🇺🇸 FED HOLDS RATES AT 5.25%. POWELL: NO CUT UNTIL INFLATION UNDER CONTROL"
-     "🇬🇧 BANK OF ENGLAND CUTS RATES 25BPS TO 4.5%. FIRST CUT IN 4 YEARS"
-     "🇪🇺 ECB CUTS RATES 25BPS. LAGARDE: MORE CUTS LIKELY IF INFLATION FALLS"
+     "🇬🇧 BANK OF ENGLAND CUTS RATES 25BPS TO 4.5%"
+     "🇪🇺 ECB CUTS RATES 25BPS. LAGARDE: MORE CUTS LIKELY"
 
-   GLOBAL RULES FOR ALL FORMATS:
+   GLOBAL RULES:
    - EVERYTHING IN CAPITALS
-   - NEVER use — or . as separators mid-sentence. Full stops only at end of sentences
-   - No hashtags. No source. No markdown. No links. No brackets around tickers
+   - No hashtags. No source. No markdown. No links. No brackets
    - Only tweet when actual data has dropped. Never preview tweets
+   - Each line max 35 chars to avoid mobile wrapping on data tweets
 
 Examples of correct JSON output:
 {"score": 10, "tweet": "🚨 [ BREAKING ]\n\nSEC APPROVES SPOT ETHEREUM ETFS. BLACKROCK AND FIDELITY GREENLIT"}
 {"score": 9, "tweet": "🚨 [ BREAKING ]\n\nFED CUTS RATES 50BPS. FIRST CUT IN 4 YEARS"}
-{"score": 8, "tweet": "APPLE $AAPL EARNINGS\n\nEPS: $1.65 vs EST: $1.61\nREV: $95.4B vs EST: $94.2B\nGUIDANCE: +14% vs EST +5%"}
-{"score": 8, "tweet": "US CPI. MARCH 2025\n\nHEADLINE: 3.1% vs EST 3.2%\nCORE: 3.9% vs EST 4.0%"}
-{"score": 7, "tweet": "*BYBIT HACKED FOR $1.4B. LARGEST CRYPTO HACK IN HISTORY. WITHDRAWALS PAUSED"}
-{"score": 7, "tweet": "*COINBASE RAISES $500M. VALUATION HITS $12B"}
+{"score": 8, "tweet": "U.S CPI\n\nCPI: +2.7% YoY vs +2.7% EST\nCORE CPI: +2.6% YoY vs +2.7% EST"}
+{"score": 8, "tweet": "U.S JOBS REPORT\n\nNFP: +177K vs EST +133K\nUNEMPLOYMENT: 4.2% vs EST 4.3%"}
+{"score": 8, "tweet": "APPLE $AAPL EARNINGS\n\nEPS: $1.65 vs EST $1.61\nREV: $95.4B vs EST $94.2B\nGUIDANCE: +14% vs EST +5%"}
+{"score": 7, "tweet": "BYBIT HACKED FOR $1.4B. LARGEST CRYPTO HACK IN HISTORY"}
+{"score": 7, "tweet": "COINBASE RAISES $500M. VALUATION HITS $12B"}
 
 Respond ONLY in this exact JSON format on a single line, nothing else:
 {"score": <number>, "tweet": "<tweet text or empty string if score < 7>"}`;
