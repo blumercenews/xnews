@@ -1,6 +1,3 @@
-// delete_tweets.js — run once to delete all tweets
-// Usage: node delete_tweets.js
-
 const { TwitterApi } = require("twitter-api-v2");
 
 const twitter = new TwitterApi({
@@ -10,14 +7,14 @@ const twitter = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
-const KEEP_TWEETS = ["2031466128669618310"]; // pinned tweet — never delete
-  console.log("🗑️  Starting tweet deletion...");
+const KEEP_TWEETS = ["2031466128669618310"];
 
+async function deleteAllTweets() {
+  console.log("🗑️  Starting tweet deletion...");
   let deleted = 0;
   let errors = 0;
 
   try {
-    // Get your own user ID first
     const me = await twitter.v2.me();
     const userId = me.data.id;
     console.log(`👤 User ID: ${userId}`);
@@ -25,11 +22,7 @@ const KEEP_TWEETS = ["2031466128669618310"]; // pinned tweet — never delete
     let paginationToken;
 
     do {
-      // Fetch up to 100 tweets at a time
-      const params = {
-        max_results: 100,
-        "tweet.fields": ["id"],
-      };
+      const params = { max_results: 100, "tweet.fields": ["id"] };
       if (paginationToken) params.pagination_token = paginationToken;
 
       const timeline = await twitter.v2.userTimeline(userId, params);
@@ -51,7 +44,6 @@ const KEEP_TWEETS = ["2031466128669618310"]; // pinned tweet — never delete
           await twitter.v2.deleteTweet(tweet.id);
           deleted++;
           console.log(`🗑️  Deleted tweet ${tweet.id} (${deleted} total)`);
-          // Small delay to avoid rate limits
           await new Promise(r => setTimeout(r, 500));
         } catch (e) {
           errors++;
