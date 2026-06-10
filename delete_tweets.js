@@ -10,7 +10,7 @@ const twitter = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
-async function deleteAllTweets() {
+const KEEP_TWEETS = ["2031466128669618310"]; // pinned tweet — never delete
   console.log("🗑️  Starting tweet deletion...");
 
   let deleted = 0;
@@ -44,6 +44,10 @@ async function deleteAllTweets() {
 
       for (const tweet of tweets) {
         try {
+          if (KEEP_TWEETS.includes(tweet.id)) {
+            console.log(`📌 Skipping pinned tweet ${tweet.id}`);
+            continue;
+          }
           await twitter.v2.deleteTweet(tweet.id);
           deleted++;
           console.log(`🗑️  Deleted tweet ${tweet.id} (${deleted} total)`);
