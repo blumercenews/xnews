@@ -19,15 +19,20 @@ async function deleteAll() {
     try {
       await twitter.v2.deleteTweet(id);
       deleted++;
-      process.stdout.write('Deleted ' + deleted + '/' + TWEET_IDS.length + '\r');
-      await sleep(600);
+      console.log('Deleted ' + deleted + '/' + TWEET_IDS.length);
+      await sleep(3000);
     } catch (e) {
-      errors++;
-      console.log('Failed ' + id + ': ' + e.message);
-      await sleep(600);
+      if (e.code === 429) {
+        console.log('Rate limited — waiting 60 seconds...');
+        await sleep(60000);
+      } else {
+        errors++;
+        console.log('Failed ' + id + ': ' + e.message);
+        await sleep(3000);
+      }
     }
   }
-  console.log('\nDone. Deleted ' + deleted + '. Errors: ' + errors);
+  console.log('Done. Deleted ' + deleted + '. Errors: ' + errors);
 }
 
 deleteAll();
