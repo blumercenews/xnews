@@ -15,9 +15,10 @@ async function deleteAll() {
   console.log('Starting deletion of ' + TWEET_IDS.length + ' tweets...');
   let deleted = 0;
   let errors = 0;
+  const client = twitter.v1;
   for (const id of TWEET_IDS) {
     try {
-      await twitter.v2.deleteTweet(id);
+      await client.deleteTweet(id);
       deleted++;
       console.log('Deleted ' + deleted + '/' + TWEET_IDS.length);
       await sleep(3000);
